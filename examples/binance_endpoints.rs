@@ -16,10 +16,10 @@ async fn main() {
     Builder::new().filter_level(LevelFilter::Info).parse_default_env().init();
     info!("running general endpoints");
     general().await;
-    info!("running market endpoints");
-    // market_data().await;
-    info!("running account (private) endpoints");
-    account().await;
+    // info!("running market endpoints");
+    // // market_data().await;
+    // info!("running account (private) endpoints");
+    // account().await;
 }
 
 
@@ -53,120 +53,6 @@ async fn general() {
     }
 }
 
-async fn account() {
-    let market: Market = Binance::new(None, None);
-    let account: Account = Binance::new_with_env(&Config::testnet());
-    let symbol = "BTCUSDT";
-    let SymbolPrice { price, .. } = market.get_price(symbol).await.unwrap();
-    match account.get_account().await {
-        Ok(answer) => info!("get_account {:?}", answer.balances),
-        Err(e) => error!("Error: {e}"),
-    }
-
-    match account.get().await {
-        Ok(answer) => info!("get_account {:?}", answer.balances),
-        Err(e) => error!("Error: {e}"),
-    }
-    match account.get_open_orders(symbol).await {
-        Ok(answer) => info!("get_open_orders {:?}", answer),
-        Err(e) => error!("Error: {e}"),
-    }
-
-    let limit_buy = OrderRequest {
-        symbol: symbol.to_string(),
-        quantity: Some(0.001),
-        price: Some(price),
-        order_type: OrderType::Limit,
-        side: OrderSide::Buy,
-        time_in_force: Some(TimeInForce::FOK),
-        ..OrderRequest::default()
-    };
-    match account.place_order(limit_buy).await {
-        Ok(answer) => info!("{:?}", answer),
-        Err(e) => error!("Error: {e}"),
-    }
-
-    let market_buy = OrderRequest {
-        symbol: symbol.to_string(),
-        quantity: Some(0.001),
-        order_type: OrderType::Market,
-        side: OrderSide::Buy,
-        ..OrderRequest::default()
-    };
-    match account.place_order(market_buy).await {
-        Ok(answer) => info!("{:?}", answer),
-        Err(e) => error!("Error: {e}"),
-    }
-
-    let limit_sell = OrderRequest {
-        symbol: symbol.to_string(),
-        quantity: Some(0.001),
-        price: Some(price * 1.02),  // 确保挂单不会立即成交
-        order_type: OrderType::Limit,
-        side: OrderSide::Sell,
-        time_in_force: Some(TimeInForce::GTC),// 确保挂单不会立即成交
-        ..OrderRequest::default()
-    };
-    let mut a_open_order_id = None;
-    match account.place_order(limit_sell).await {
-        Ok(answer) => {
-            info!("{:?}", answer);
-            a_open_order_id = Some(answer.order_id);
-        }
-        Err(e) => error!("Error: {e}"),
-    }
-
-    let market_sell = OrderRequest {
-        symbol: symbol.to_string(),
-        quantity: Some(0.001),
-        order_type: OrderType::Market,
-        side: OrderSide::Sell,
-        ..OrderRequest::default()
-    };
-
-    let mut last_order_id: Option<_> = None;
-    match account.place_order(market_sell).await {
-        Ok(answer) => {
-            info!("{:?}", answer);
-            last_order_id = Some(answer.order_id);
-        }
-        Err(e) => error!("Error: {e}"),
-    }
-
-    let order_id = last_order_id.unwrap();
-    let order_status = OrderStatusRequest {
-        symbol: symbol.to_string(),
-        order_id: Some(order_id),
-        ..OrderStatusRequest::default()
-    };
-
-    match account.order_status(order_status).await {
-        Ok(answer) => info!("order_status: {:?}", answer),
-        Err(e) => error!("Error: {e}"),
-    }
-
-    let order_id = a_open_order_id.unwrap();
-    let order_cancellation = OrderCancellation {
-        symbol: symbol.to_string(),
-        order_id: Some(order_id),
-        ..OrderCancellation::default()
-    };
-
-    match account.cancel_order(order_cancellation).await {
-        Ok(answer) => info!("{:?}", answer),
-        Err(e) => error!("Error: {e}"),
-    }
-
-    match account.get_balance("BTC").await {
-        Ok(answer) => info!("{:?}", answer),
-        Err(e) => error!("Error: {e}"),
-    }
-
-    match account.trade_history(symbol).await {
-        Ok(answer) => info!("{:?}", answer),
-        Err(e) => error!("Error: {e}"),
-    }
-}
 
 async fn market_data() {
     let market: Market = Binance::new(None, None);

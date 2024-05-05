@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-binance-rs-async = "1.3.3"
+binance-rs-async = { git = "https://github.com/lijiachang/binance-rs-async-ext.git" }
 toml = "0.8.12"
 anyhow = "1.0.80"
 tokio-tungstenite = "0.21"
@@ -31,8 +31,7 @@ hex = "0.4"
 ring = "0.17"
 boolinator = "2.4"
 dashmap = "5.5.3"
-rocksdb = { version = "0.22.0", features = ["multi-threaded-cf"] }
-bincode = "1.3.3"
+tracing = { version = "0.1", features = ["release_max_level_debug", "log"] }
 
 #toml: 用于解析和序列化TOML格式的库，类似Python中的toml库。
 #anyhow: 一个错误处理库，提供了方便的错误传播和处理方式，类似Python中的异常处理。
