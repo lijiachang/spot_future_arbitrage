@@ -7,6 +7,7 @@
 * 币本位交割合约对冲
 
 **采用纯Rust代码编写，用来学习练手**
+如果你使用Python，可以看看这里->https://github.com/lijiachang/okx_spot_future_arbitrage
 
 # 项目进展
 1. api实现
